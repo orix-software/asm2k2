@@ -144,9 +144,9 @@ start_6522:
 irq_reset:
 	.byt $40 ; RTI opcode
 path:
-    .byte "/usr/share/asm2k2/final.out",0
+    .asciiz "/usr/share/asm2k2/loadere.bin"
 file:
-    .asciiz "loadere.bin"
+    .asciiz "/loadere.bin"
 
 opcode_rti:
 	.byt $40
@@ -158,9 +158,9 @@ opcode_rti:
 
 .proc _twil_program_rambank
 
-	;sta		sector_to_update
-    lda     #<file
-    ldx     #>file
+
+    lda     #<path
+    ldx     #>path
 	sta     ptr1
 	stx		ptr1+1
 
@@ -184,6 +184,9 @@ reset_label:
 @L1:	
 	lda     (ptr1),y
     beq 	@S1
+
+    cmp     #'/'
+    beq     @open_slash
   	
   	cmp     #'a'                        ; 'a'
   	bcc     @do_not_uppercase
@@ -204,8 +207,24 @@ reset_label:
     bne 	start
 
 	rts
+@open_slash:
+    lda     #$00
+	sta		CH376_DATA
+	sty     savey
+	jsr		_ch376_file_open
 
+    lda     #CH376_SET_FILE_NAME        ;$2f
+    sta     CH376_COMMAND
 
+    ldy     savey
+    iny
+    
+    cmp		#CH376_ERR_MISS_FILE
+    bne 	@L1
+
+    rts    
+savey:
+    .res 1
 start:
 
 
@@ -262,7 +281,7 @@ start:
 
 
 
-	lda		#$00
+
 
 	rts
 
@@ -272,9 +291,5 @@ str_slash:
 
 .endproc
 
-current_bank:
-    .res	1
-sector_to_update:
-    .res    1
 nb_bytes:
     .res    1
