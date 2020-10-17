@@ -1,0 +1,275 @@
+; da65 V2.17
+; Created:    2020-10-17 22:10:54
+; Input file: src/loader.o
+; Page:       1
+
+
+        .setcpu "6502"
+
+L0600           := $0600
+L1000           := $1000
+L1020           := $1020
+L103A           := $103A
+LC010           := $C010
+LC035           := $C035
+LFC00           := $FC00
+LFCB3           := $FCB3
+LFCD8           := $FCD8
+        ldy     #$FF
+LFE0D:  ldx     #$FF
+LFE0F:  lda     $0341
+        and     #$80
+        cmp     #$80
+        bne     LFE21
+        dex
+        bne     LFE0F
+        dey
+        bne     LFE0D
+        lda     #$01
+        rts
+
+LFE21:  lda     #$22
+        sta     $0341
+        lda     $0340
+        rts
+
+        rts
+
+        ldx     #$3A
+        bit     $3CA2
+        stx     $0341
+        sta     $0340
+        sty     $0340
+        lda     #$00
+        sta     $0340
+        sta     $0340
+        jsr     L1000
+        rts
+
+        lda     #$32
+        sta     $0341
+        jsr     L1000
+        rts
+
+        jmp     LFC00
+
+        sei
+        lda     #$7F
+        sta     $030D
+        ldy     #$00
+LFE59:  lda     $B500,y
+        sta     $9900,y
+        lda     $B600,y
+        sta     $9A00,y
+        lda     $B700,y
+        sta     $9B00,y
+        lda     $B900,y
+        sta     $9D00,y
+        lda     $BA00,y
+        sta     $9E00,y
+        lda     $BB00,y
+        sta     $9F00,y
+        dey
+        bne     LFE59
+        lda     #$A0
+        sta     $01
+        lda     #$00
+        sta     $00
+        ldx     #$20
+LFE8A:  sta     ($00),y
+        iny
+        bne     LFE8A
+        inc     $01
+        dex
+        bne     LFE8A
+        lda     #$1E
+        sta     $BF40
+        lda     #$A0
+        sta     $01
+        ldx     #$20
+        ldx     #$40
+LFEA1:  ldy     #$7C
+LFEA3:  lda     #$40
+        sta     ($00),y
+        dey
+        bpl     LFEA3
+        lda     $00
+        adc     #$7D
+        sta     $00
+        bcc     LFEB4
+        inc     $01
+LFEB4:  dex
+        bne     LFEA1
+        ldy     #$00
+        lda     #$C0
+        sta     $01
+        lda     #$00
+        sta     $00
+        lda     #$5A
+        sta     $02
+        lda     #$27
+        sta     $03
+        ldx     #$32
+LFECB:  lda     ($02),y
+        sta     ($00),y
+        iny
+        bne     LFECB
+        inc     $01
+        inc     $03
+        dex
+        bne     LFECB
+        jmp     LFCB3
+
+        lda     #$06
+        sta     $01
+        lda     #$00
+        sta     $00
+        lda     #$5A
+        sta     $02
+        lda     #$27
+        sta     $03
+        ldy     #$00
+        ldx     #$64
+LFEF0:  lda     ($02),y
+        sta     ($00),y
+        iny
+        bne     LFEF0
+        inc     $01
+        inc     $03
+        dex
+        bne     LFEF0
+        jmp     L0600
+
+        lda     #$60
+        sta     $0400
+        jsr     LFCD8
+        lda     #$C8
+        sta     LFFFE
+        lda     #$FC
+        sta     LFFFF
+        jsr     LC010
+        pha
+        txa
+        pha
+        tya
+        pha
+        lda     $0304
+        pla
+        tay
+        pla
+        tax
+        pla
+        jmp     LC035
+
+        lda     #$F7
+        sta     $0302
+        lda     #$FF
+        sta     $0303
+        lda     #$7F
+        sta     $030E
+        lda     #$C0
+        sta     $030E
+        lda     #$40
+        sta     $030B
+        lda     #$10
+        sta     $0306
+        lda     #$27
+        sta     $0307
+        lda     #$DD
+        sta     $030C
+        rts
+
+        rti
+
+        .byte   $2F
+        adc     $73,x
+        .byte   $72
+        .byte   $2F
+        .byte   $73
+        pla
+        adc     ($72,x)
+        adc     $2F
+        adc     ($73,x)
+        adc     $6B32
+        .byte   $32
+        .byte   $2F
+        ror     $69
+        ror     $6C61
+        rol     $756F
+        .byte   $74
+        brk
+        ror     $69
+        ror     $6C61
+        rol     $756F
+        .byte   $74
+        brk
+        rti
+
+        lda     #$1E
+        ldx     #$FD
+        sta     $88
+        stx     $89
+        lda     #$2F
+        sta     $0341
+        lda     #$2F
+        sta     $0340
+        lda     #$00
+        sta     $0340
+        jsr     L103A
+        lda     #$2F
+        sta     $0341
+        ldy     #$00
+LFF98:  lda     ($88),y
+        beq     LFFAE
+        cmp     #$61
+        bcc     LFFA6
+        cmp     #$7B
+        bcs     LFFA6
+        sbc     #$1F
+LFFA6:  sta     $0340
+        iny
+        bne     LFF98
+        lda     #$00
+LFFAE:  sta     $0340
+        jsr     L103A
+        cmp     #$42
+        bne     LFFB9
+        rts
+
+LFFB9:  lda     #$00
+        sta     $8C
+        lda     #$06
+        sta     $8D
+        lda     #$80
+        ldy     #$67
+        jsr     L1020
+LFFC8:  cmp     #$1D
+        bne     LFFF8
+        lda     #$27
+        sta     $0341
+        lda     $0340
+        sta     $FDB1
+        ldy     #$00
+LFFD9:  lda     $0340
+        sta     ($8C),y
+        iny
+        dec     $FDB1
+        bne     LFFD9
+        tya
+        clc
+        adc     $8C
+        bcc     LFFEC
+        inc     $8D
+LFFEC:  sta     $8C
+        lda     #$3B
+        sta     $0341
+        jsr     L1000
+        bne     LFFC8
+LFFF8:  lda     #$00
+        rts
+
+        .byte   $2F
+        brk
+        brk
+LFFFE:  brk
+LFFFF:  brk

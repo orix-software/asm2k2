@@ -1,0 +1,22 @@
+LoadDiskTemplate asm2k2.dsk
+
+;LoadDiskTemplate default.dsk
+
+ 
+
+; Use 40 tracks so the image works for 3" and 5.25" disks too!
+
+;DefineDisk 2 40 17 5							; 2 sides, 42 tracks, 17 sectors, interleave 5
+
+;DefineDisk 2 80 17 5							; 2 sides, 80 tracks, 17 sectors, interleave 5
+
+ 
+
+; Ordre de chargement (index) : 0,1,5,3,2,4
+
+
+SaveFile "loader.bin"  $0 $05 $01  ; Name Track Sector Lenght adress
+SaveFile "music.bin"  $1 $0d $3D  ; Name Track Sector Lenght adress
+SaveFile "loader2.bin"  $3 $11 $FF  ; Name Track Sector Lenght adress
+
+
